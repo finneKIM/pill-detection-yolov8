@@ -1,115 +1,41 @@
-# Sprint AI Project
-- 경구약제 이미지 객체 검출(Object Detection) 프로젝트
+# 경구약제 이미지 객체 검출(Object Detection) 프로젝트
 
+컨베이어벨트·모바일 환경에서 실시간 알약 탐지를 위한 YOLO 기반 객체 검출 모델 개발 프로젝트입니다.
 
-## 📁 Project Structure
+**기간**: 2025.07.15 – 2025.07.31
 
-```
-sprint_ai03_1/
-├── data/                               (→ git ignored)
-│   ├── raw_data/                       (→ git ignored)
-│   └── data_gjy/                       (→ git ignored)
-│   └── data_khn/                       (→ git ignored)
-│   └── data_yye/                       (→ git ignored)
-│   └── data_lyh/                       (→ git ignored)
-│   └── data_jmj/                       (→ git ignored)
-│   └── data_final/                     (not yet, git ignored, google drive link)
-├── models/                             (→ git ignored)
-├── notebooks/
-│   └── data_preprocessing_gjy.ipynb    (→ personal)
-│   └── data_preprocessing_khn.ipynb    (→ personal)
-│   └── data_preprocessing_yye.ipynb    (→ personal)
-│   └── data_preprocessing_lyh.ipynb    (→ personal)
-│   └── data_preprocessing_jmj.ipynb    (→ personal)
-├── scripts/
-│   ├── preprocess.py            – raw_data → YOLO train/val 분할·포맷 생성
-│   ├── convert_yolo2coco.py     – YOLO TXT → COCO JSON 변환
-│   ├── convert_subset.py        – COCO JSON에서 subset YOLO TXT 추출
-│   ├── convert_csv2json.py      – 예측 CSV → COCO JSON 변환
-│   ├── coco_eval.py             – COCO 툴킷 기반 성능 평가
-│   ├── calibration_eval.py      – ECE 계산·Reliability Diagram 시각화
-│   ├── collect_fn.py            – False Negative 박스 시각화용 수집 도구
-│   └── train_curve.py           – results.csv 기반 학습 곡선 플롯
-├── src/
-│   ├── train.py                 – 모델 학습 메인 스크립트
-│   ├── evaluate.py              – 학습된 모델 성능 평가
-│   ├── inference.py             – NMS/TTA 포함 추론 스크립트
-│   ├── utils.py                 – 공통 유틸(데이터 증강·라벨 파싱)
-│   ├── visualization.py         – 학습·예측 시각화 도구
-│   └── check.py                 – validation 이미지 순회 시각화용 툴
-├── utils/
-│   ├── analyze_annotation_mismatch.py        – 폴더명과 실제 하위 폴더 불일치 분석
-│   ├── analyze_drug_annotation_coverage.py   – 약품코드별 어노테이션 커버리지 분석
-│   ├── analyze_drug_bbox.py                  – 바운딩 박스 통계 및 시각화
-│   ├── bbox_gui_editor.py                    – 바운딩 박스 편집 GUI
-│   ├── drug_code_viewer.py                   – 약품 코드별 이미지 뷰어
-│   └── data_augmentation.py                  – 이미지 회전을 통한 데이터 증강
-│   └── create_submission.py                  - YOLO 모델 예측 및 제출 파일 생성
-├── .gitignore
-├── README.md
-└── requirements.txt                    (not yet)
-└── requirements.yaml                   (not yet)
-```
+**담당**: 데이터 EDA 및 어노테이션 정합성 검증
 
-## 📂 Directory Description
+---
 
-### `data/`
-- **`raw_data/`**: 원본 데이터 파일들 (용량으로 미업로드) (이미지, 어노테이션 등)
-- **`data_final/`**: 전처리된 최종 데이터 (용량으로 미업로드)
+## 담당 업무: EDA 및 데이터 품질 진단
 
-### `models/`
-- 학습된 모델 파일들을 저장하는 디렉토리 (용량으로 미업로드)
+수천 개의 개별 JSON 어노테이션을 COCO 통합 포맷으로 병합하는 코드를 작성하고, 이를 기반으로 데이터 품질을 전방위로 진단했습니다.
 
-### `notebooks/`
-- 데이터 전처리 / 모델링 주피터 노트북 (개인용)
+- COCO 포맷 통합 코드 작성 — 개별 JSON 파일을 images/annotations/categories 구조로 병합하는 변환 코드 구현
+- COCO→YOLO 포맷 변환 스크립트 작성 — YOLOv8 학습에 필요한 라벨(txt)+yaml 생성 자동화
+- EDA: 이미지·객체 수 분포, 73개 클래스 간 데이터 불균형(어노테이션 5개 이하 클래스 식별) 시각화
+- 팀 공용 분석 도구(bbox 뷰어/에디터, 약품코드별 이미지 뷰어)를 활용해 객체 겹침, 약품코드-라벨 불일치, 잘못된 bbox 좌표를 직접 검토·수동 판별
 
-### `scripts/`
-- **`preprocess.py`**: raw_data → YOLO train/val 분할·포맷 생성
-- **`convert_yolo2coco.py`**: YOLO TXT → COCO JSON 변환
-- **`convert_subset.py`**: COCO JSON에서 subset YOLO TXT 추출
-- **`convert_csv2json.py`**: 예측 CSV → COCO JSON 변환
-- **`coco_eval.py`**: COCO 툴킷 기반 성능 평가
-- **`calibration_eval.py`**: vECE 계산·Reliability Diagram 시각화
-- **`collect_fn.py`**: False Negative 박스 시각화용 수집 도구
-- **`train_curve.py`**: results.csv 기반 학습 곡선 플롯
-  
-### `src/`
-- **`evaluate.py`**: 모델 평가 관련 테스트 코드
-- **`train.py`**: 모델 학습 관련 테스트 코드
-- **`utils.py`**: 유틸리티 함수 테스트 코드
-- **`inference.py`**: NMS/TTA 포함 추론 스크립트
-- **`visualization.py`**: 학습·예측 시각화 도구
-- **`check.py`**: validation 이미지 순회 시각화용 툴
+---
 
-### `utils/`
-- **`analyze_annotation_mismatch.py`**: 폴더명과 실제 하위 폴더 불일치 분석
-- **`analyze_drug_annotation_coverage.py`**: 약품코드별 어노테이션 커버리지 분석
-- **`analyze_drug_bbox.py`**: 바운딩 박스 통계 및 시각화
-- **`bbox_gui_editor.py`**: 바운딩 박스 편집 GUI
-- ** `drug_code_viewer.py`**: 약품 코드별 이미지 뷰어
-- ** `data_augmentation.py`**: 이미지 회전을 통한 데이터 증강
-- ** `create_submission.py`**: YOLO 모델 예측 및 제출 파일 생성
-  
-### Root Files
-- **`.gitignore`**: Git에서 제외할 파일/폴더 설정
-- **`README.md`**: 프로젝트 설명서
-- **`requirements.txt`**:  Python 패키지 의존성 목록
-- **`requirements.yaml`**: Python 패키지 의존성 목록
+## 개인 탐색: YOLOv8 모델 사이즈별 비교 테스트
 
-### 전처리 툴 배포
-- 제작자 : 이영호
-- 링크 : https://github.com/LEEYH205/bbox-annotation-tools
-- PyPi : https://pypi.org/project/bbox-annotation-tools/
+공식 역할(EDA)과 별개로 진행한 개인 실험입니다.
 
-### 보고서 링크
-- https://drive.google.com/file/d/1FfGMFbhun41L-32i1dkdtHMiwBILUxTr
-  
-### 노션 링크
-- 팀 노션 : https://www.notion.so/Codeit-AI-3-_-1-_-23155af55ff6802898a1ed2a7052caf8
-- 공지연 (모델링) : https://www.notion.so/Codeit-AI-3-_-Part2_1-_-_-Daily-23290068d16d80dd8b4cef8e763f36f6
-- 김하나 (전처리) : https://www.notion.so/232bea5ebd7c80a2b9ebf4dc95703d01?v=232bea5ebd7c8087abd6000cd5265d34
-- 유영은 (전처리) : https://www.notion.so/Codeit-AI-3-_-Part2_1-_-_-Daily-2315954c5686807f9839f52aae3eef7c
-- 이영호 (팀장, 모델링) : https://www.notion.so/Codeit-AI-3-_-Part2_1-_-_-Daily_-23155af55ff680b2a0acee07f8e65d15
-- 지민종 (파인튜닝) : https://www.notion.so/Codeit-AI-3-_-Part2_1-_-Daily_-2318c9c2de22801cba17ee3d6a45ce0c
+- 동일 학습 조건(20 epoch, imgsz 640, batch 16)에서 YOLOv8 l / m / s 3개 사이즈를 비교 학습
+- mAP·Recall 기준 YOLOv8s가 가장 우수한 성능을 보여 최적 모델 사이즈로 판단
+- 팀의 최종 결론(YOLOv8s·v8n 조합으로 mAP 0.995 달성)에서도 v8s가 핵심 모델로 함께 채택되어, 독자적 판단이 실제 결과와 부합함을 확인
 
+---
 
+## 프로젝트 구성
+
+데이터 전처리 노트북, COCO↔YOLO 변환 스크립트, 라벨링 검증용 자체 GUI 도구, 모델 학습/평가 파이프라인으로 구성된 저장소입니다. (자세한 구조는 원본 레포에서 확인 가능)
+
+---
+
+## Links
+
+- 팀 원본 레포: https://github.com/LEEYH205/sprint_ai03_1
+- 최종 발표자료(PDF): https://drive.google.com/file/d/1FfGMFbhun41L-32i1dkdtHMiwBILUxTr
